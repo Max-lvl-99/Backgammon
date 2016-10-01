@@ -50,12 +50,12 @@ window.onload = function init()
        vec4(cubeSize, 0.0, 0.0, 1.0)
     ];
      colors = [
-        vec4(1.0, 0.0, 0.0, 1.0),  // red
-        vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        vec4(0.0, 1.0, 0.0, 1.0),  // green
-        vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        vec4(0.0, 1.0, 1.0, 1.0)   // cyan
+        vec4(1, 1, 1, 1.0),  //whhite
+        vec4(1, 1, 1, 1.0),  //whhite
+        vec4(1, 1, 1, 1.0),  //whhite
+        vec4(1, 1, 1, 1.0),  //whhite
+        vec4(1, 1, 1, 1.0),  //whhite
+        vec4(1, 1, 1, 1.0),  //whhite
     ];
     
     // Load indices to represent the triangles that will draw each face
