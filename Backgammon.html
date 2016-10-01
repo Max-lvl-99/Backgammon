@@ -2,87 +2,48 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-<title>Shaded Sphere #1</title>
+<title>Cube 7 - Rotating 3D Cube with Shadow</title>
+
+<p>
+<button id="XButton">Rotate x-axis</button>
+<button id="YButton">Rotate y-axis</button>
+<button id="ZButton">Rotate z-axis</button>
+<button id="Reset">Reset angles</button>
+<button id="StartStop">Start/Stop rotation</button>
+</p>
+
 <script id="vertex-shader" type="x-shader/x-vertex">
 attribute vec4 vPosition;
-attribute vec4 vNormal;
-varying vec4 fColor;
-uniform vec4 ambientProduct, diffuseProduct, specularProduct;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-uniform vec4 lightPosition;
-uniform float shininess;
+uniform   mat4 modelView;
+uniform   mat4 projection;
 
 void
 main()
 {
-    vec3 pos = -(modelViewMatrix * vPosition).xyz;
-    vec3 light = lightPosition.xyz;
-    vec3 L = normalize( light - pos );
-
-	
-    vec3 E = normalize( -pos );
-    vec3 H = normalize( L + E );
-
-    
-    // Transform vertex normal into eye coordinates
-    
- 
-    vec3 N = normalize( (modelViewMatrix*vNormal).xyz);
-
-    // Compute terms in the illumination equation
-    vec4 ambient = ambientProduct;
-
-    float Kd = max( dot(L, N), 0.0 );
-    vec4  diffuse = Kd*diffuseProduct;
-
-    float Ks = pow( max(dot(N, H), 0.0), shininess );
-    vec4  specular = Ks * specularProduct;
-    
-    if( dot(L, N) < 0.0 ) {
-	specular = vec4(0.0, 0.0, 0.0, 1.0);
-    } 
-
-    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
-    
-    fColor = ambient + diffuse +specular;
-
-    fColor.a = 1.0;
+    gl_Position = projection * modelView * vPosition;
 }
 </script>
 
 <script id="fragment-shader" type="x-shader/x-fragment">
-
 precision mediump float;
-
-varying vec4 fColor;
+   
+uniform vec4 color;
 
 void
 main()
 {
-
-    gl_FragColor = fColor;
-
+    gl_FragColor = color;
 }
 </script>
-</head>
-
-<body>
-<p>
-<button id = "Button0">Increase R</button>
-<button id = "Button1">Decrease R</button>
-<button id = "Button2">Increase theta</button>
-<button id = "Button3">Decrease theta</button>
-<button id = "Button4">Increase phi</button>
-<button id = "Button5">Decrease phi</button>
-</p>
 
 <script type="text/javascript" src="./Common/webgl-utils.js"></script>
 <script type="text/javascript" src="./Common/initShaders.js"></script>
 <script type="text/javascript" src="./Common/MV.js"></script>
 <script type="text/javascript" src="Backgammon.js"></script>
+</head>   
 
-<canvas id="gl-canvas" width="512" height="512">
+<body>
+<canvas id="gl-canvas" width="500" height="500">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 </body>

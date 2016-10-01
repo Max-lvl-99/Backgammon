@@ -1,4 +1,3 @@
-
 var canvas;
 var gl;
 var colorLoc;
@@ -41,14 +40,14 @@ window.onload = function init()
 	// Load vertices and colors for cube faces
 	
 	vertices = [
-	   vec4(0.0, 1.0, cubeSize, 1.0),
-	   vec4(0.0, cubeSize+1, cubeSize, 1.0),
-	   vec4(cubeSize, cubeSize+1, cubeSize, 1.0),
-	   vec4(cubeSize, 1.0, cubeSize, 1.0),
-	   vec4(0.0, 1.0, 0.0, 1.0),
-	   vec4(0.0, cubeSize+1, 0.0, 1.0),
-	   vec4(cubeSize, cubeSize+1, 0.0, 1.0),
-	   vec4(cubeSize, 1.0, 0.0, 1.0)
+	   vec4(0.0, 0.0, cubeSize, 1.0),
+	   vec4(0.0, 1, cubeSize, 1.0),
+	   vec4(cubeSize, 1, cubeSize, 1.0),
+	   vec4(cubeSize, 0.0, cubeSize, 1.0),
+	   vec4(0.0, 0.0, 0.0, 1.0),
+	   vec4(0.0, 1, 0.0, 1.0),
+	   vec4(cubeSize, 1, 0.0, 1.0),
+	   vec4(cubeSize, 0.0, 0.0, 1.0)
 	];
 	 colors = [
 	    vec4(1.0, 0.0, 0.0, 1.0),  // red
