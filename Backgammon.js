@@ -56,7 +56,7 @@ window.onload = function init()
     ];
     index= index+8;
     var x1; var x2;
-       //draw triangles (these will be number 8 - 44 indices)
+       //draw triangles (top row)
         for(i=0;i<13;i++){
             x1 = (3/28)+i*(cubeSize*(1/14));
             x2=(3/28)+(i+1)*(cubeSize*(1/14));
@@ -79,7 +79,7 @@ window.onload = function init()
             //this is the middle vertex of the triangle
             vertices.push(vec4((x1+x2)/2, cubeHeight,(7/16)*cubeSize, 1.0));
             index = index+3;
-        } //below are indices 45 - 81
+        } //draw triangles (bottom row)
         for(i=0;i<13;i++){
             x1=(1/28)+i*(cubeSize*(1/14));
             x2=(1/28)+(i+1)*(cubeSize*(1/14));
@@ -93,7 +93,7 @@ window.onload = function init()
     for(i=0;i<12;i++){
         colors.push(vec4(1.0,1.0,0,1.0));
     } //Draw grey triangles.
-    for(i=0;i<24;i++){
+    for(i=0;i<36;i++){
         if(i==6){
             colors.push(vec4(0,0,0,1));
             colors.push(vec4(0,0,0,1));
