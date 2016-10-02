@@ -55,17 +55,51 @@ window.onload = function init()
        vec4(cubeSize, 0.0, 0.0, 1.0)
     ];
     index= index+8;
+    var x1; var x2;
        //draw triangles (these will be number 8 - 44 indices)
-        for(i=0;i<12;i++){
-            vertices.push(vec4((1/28)+i*(cubeSize*(1/14)), cubeHeight, 0, 1.0));
-            vertices.push(vec4((3/28)+i*(cubeSize*(1/14)), cubeHeight, 0, 1.0));
-            vertices.push(vec4((1/14)+i*(cubeSize*(1/14)), cubeHeight,(7/16)*cubeSize, 1.0));
-            index= index+3;
+        for(i=0;i<13;i++){
+            x1 = (1/28)+i*(cubeSize*(1/14));
+            x2=(1/28)+(i+1)*(cubeSize*(1/14));
+            //draw the bar in the middle
+            if(i==6){            
+                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+                vertices.push(vec4(x1, cubeHeight+.01, cubeHeight,(7/16)*cubeSize, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                //Draw the other triangle to make a rectangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                vertices.push(vec4(x2, cubeHeight+.01, (7/16)*cubeSize, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+                index= index+6;
+                continue;
+            }
+            vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+            vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+            //this is the middle vertex of the triangle
+            vertices.push(vec4((x1+x2)/2, cubeHeight,(7/16)*cubeSize, 1.0));
+            index = index+3;
         } //below are indices 45 - 81
-        for(i=0;i<12;i++){
-            vertices.push(vec4((1/28)+i*(cubeSize*(1/14)), cubeHeight, cubeSize, 1.0));
-            vertices.push(vec4((3/28)+i*(cubeSize*(1/14)), cubeHeight, cubeSize, 1.0));
-            vertices.push(vec4((1/14)+i*(cubeSize*(1/14)), cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
+        for(i=0;i<13;i++){
+            x1=(1/28)+i*(cubeSize*(1/14));
+            x2=(1/28)+(i+1)*(cubeSize*(1/14));
+             //draw the bar in the middle
+            if(i==6){            
+                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+                vertices.push(vec4(x1, cubeHeight+.01, cubeHeight,(7/16)*cubeSize, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                //Draw the other triangle to make a rectangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                vertices.push(vec4(x2, cubeHeight+.01, (7/16)*cubeSize, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+                index= index+6;
+                continue;
+            }
+            vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+            vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
+            vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
             index=index+3;
         }
 
@@ -74,6 +108,11 @@ window.onload = function init()
         colors.push(vec4(1.0,1.0,0,1.0));
     } //Draw grey triangles.
     for(i=0;i<24;i++){
+        if(i==6 || i==18){
+            colors.push(vec4(0,0,0,1));
+            colors.push(vec4(0,0,0,1));
+            continue;
+        }
         if(i%2==0){
             colors.push(vec4(.6,0,.6,1.0));
         } else { colors.push(vec4(.3,0,.3,1.0)); }
@@ -88,12 +127,8 @@ window.onload = function init()
        6, 5, 1, 1, 2, 6,  // top face
        4, 5, 6, 6, 7, 4,  // back face
        5, 4, 0, 0, 1, 5,   // left face
-       //Below we draw the triangles on top of the board
-       8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
-       31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,
-       54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,
-       77,78,79,80,81
        ];
+    //Add the indices for drawing the triangles on top of the board.
     
     theta[0] = 0.0;
     theta[1] = 0.0;
@@ -114,7 +149,7 @@ window.onload = function init()
     var c=document.getElementById ("ZButton");
     c.addEventListener ("click", function () { axis = zAxis; });
     var d=document.getElementById ("Reset");
-    d.addEventListener ("click", function () { theta = [0.0, 0.0, 0.0]; axis = xAxis; });
+    d.addEventListener ("click", function () { theta = [0, 0.0, 0.0]; axis = xAxis; });
     var e=document.getElementById ("StartStop");
     e.addEventListener ("click", function () { rotate = !rotate; });
 
@@ -177,8 +212,8 @@ function render()
                0.0, 1.0, 0.0, cubeSize2,
                0.0, 0.0, 1.0, cubeSize2,
                0.0, 0.0, 0.0, 1.0);
-    
-    looking = lookAt (vec3(cubeSize2,cubeSize2,4*cubeSize), vec3(cubeSize2,cubeSize2,0), vec3(0.0, 1.0, 0.0));
+    //You can resize the scale here
+    looking = lookAt (vec3(cubeSize2,cubeSize2,2.5*cubeSize), vec3(cubeSize2,cubeSize2,0), vec3(0.0, 1.0, 0.0));
     projection = perspective (45.0, aspect, 1, 20*cubeSize);
     rotation = mult (rz, mult(ry, rx));
     modelView = mult(looking, mult(tz2, mult (rotation, tz1)));
