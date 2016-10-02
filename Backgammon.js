@@ -26,6 +26,8 @@ var yAxis = 1;
 var zAxis = 2;
 var axis = 0;
 var rotate = false;
+//Determines CW or CCW rotation
+var CW;
 
 var projection;
 var modelView;
@@ -56,6 +58,14 @@ window.onload = function init()
     ];
     index= index+8;
     var x1; var x2;
+        // for(i=0;i<13;i++){
+        //     x1=(1/28)+i*(cubeSize*(1/14));
+        //     x2=(1/28)+(i+1)*(cubeSize*(1/14));
+        //     vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+        //     vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
+        //     vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
+        //     index=index+3;
+        // }
        //draw triangles (top row)
         for(i=0;i<13;i++){
             x1 = (3/28)+i*(cubeSize*(1/14));
@@ -93,8 +103,8 @@ window.onload = function init()
     for(i=0;i<12;i++){
         colors.push(vec4(1.0,1.0,0,1.0));
     } //Draw grey triangles.
-    for(i=0;i<36;i++){
-        if(i==6){
+    for(i=12;i<index;i++){
+        if(i==18){
             colors.push(vec4(0,0,0,1));
             colors.push(vec4(0,0,0,1));
             continue;
@@ -105,7 +115,6 @@ window.onload = function init()
     }
     
     // Load indices to represent the triangles that will draw each face
-    
     indices = [
        1, 0, 3, 3, 2, 1,  // front face
        2, 3, 7, 7, 6, 2,  // right face
@@ -119,7 +128,7 @@ window.onload = function init()
         indices.push(i);
     }
     console.log('indices: ' + indices);
-    theta[0] = 0.0;
+    theta[0] = 90.0;
     theta[1] = 0.0;
     theta[2] = 0.0;
     
@@ -131,14 +140,20 @@ window.onload = function init()
     //projection = ortho (windowMin, windowMax, windowMin, windowMax, windowMin, windowMax+cubeSize);
     // Register event listeners for the buttons
     
-    var a=document.getElementById ("XButton");
-    a.addEventListener ("click", function() { axis = xAxis; });
-    var b=document.getElementById ("YButton");
-    b.addEventListener ("click", function () { axis = yAxis; });
-    var c=document.getElementById ("ZButton");
-    c.addEventListener ("click", function () { axis = zAxis; });
+    var aCW=document.getElementById ("XButtonCW");
+    aCW.addEventListener ("click", function() { CW=true;axis = xAxis; });
+    var aCCW=document.getElementById ("XButtonCCW");
+    aCCW.addEventListener ("click", function() { CW=false;axis = xAxis; });
+    var bCW=document.getElementById ("YButtonCW");
+    bCW.addEventListener ("click", function () { CW=true;axis = yAxis; });
+    var bCCW=document.getElementById ("YButtonCCW");
+    bCCW.addEventListener ("click", function () { CW=false;axis = yAxis; });
+    var cCW=document.getElementById ("ZButtonCW");
+    cCW.addEventListener ("click", function () { CW=true;axis = zAxis; });
+    var cCCW=document.getElementById ("ZButtonCCW");
+    cCCW.addEventListener ("click", function () { CW=false;axis = zAxis; });
     var d=document.getElementById ("Reset");
-    d.addEventListener ("click", function () { theta = [0, 0.0, 0.0]; axis = xAxis; });
+    d.addEventListener ("click", function () { theta = [90, 0.0, 0.0]; axis = xAxis; });
     var e=document.getElementById ("StartStop");
     e.addEventListener ("click", function () { rotate = !rotate; });
 
@@ -169,7 +184,8 @@ function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (rotate) {
-        theta[axis] += 0.5;
+        if(CW){theta[axis] =theta[axis] - .5;}
+        else{theta[axis] += 0.5;}
     }
     for (i=0; i<3; i++) {
         angles[i] = radians(theta[i]);
