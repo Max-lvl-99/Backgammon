@@ -58,20 +58,20 @@ window.onload = function init()
     var x1; var x2;
        //draw triangles (these will be number 8 - 44 indices)
         for(i=0;i<13;i++){
-            x1 = (1/28)+i*(cubeSize*(1/14));
-            x2=(1/28)+(i+1)*(cubeSize*(1/14));
+            x1 = (3/28)+i*(cubeSize*(1/14));
+            x2=(3/28)+(i+1)*(cubeSize*(1/14));
             //draw the bar in the middle
             if(i==6){            
                 vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-                vertices.push(vec4(x1, cubeHeight+.01, cubeHeight,(7/16)*cubeSize, 1.0));
+                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
                 //this is the middle vertex of the triangle
                 vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
                 //Draw the other triangle to make a rectangle
                 vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-                vertices.push(vec4(x2, cubeHeight+.01, (7/16)*cubeSize, 1.0));
                 //this is the middle vertex of the triangle
-                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-                index= index+6;
+                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+                vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
+                index = index+6;
                 continue;
             }
             vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
@@ -83,20 +83,6 @@ window.onload = function init()
         for(i=0;i<13;i++){
             x1=(1/28)+i*(cubeSize*(1/14));
             x2=(1/28)+(i+1)*(cubeSize*(1/14));
-             //draw the bar in the middle
-            if(i==6){            
-                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-                vertices.push(vec4(x1, cubeHeight+.01, cubeHeight,(7/16)*cubeSize, 1.0));
-                //this is the middle vertex of the triangle
-                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-                //Draw the other triangle to make a rectangle
-                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-                vertices.push(vec4(x2, cubeHeight+.01, (7/16)*cubeSize, 1.0));
-                //this is the middle vertex of the triangle
-                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-                index= index+6;
-                continue;
-            }
             vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
             vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
             vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
@@ -108,7 +94,7 @@ window.onload = function init()
         colors.push(vec4(1.0,1.0,0,1.0));
     } //Draw grey triangles.
     for(i=0;i<24;i++){
-        if(i==6 || i==18){
+        if(i==6){
             colors.push(vec4(0,0,0,1));
             colors.push(vec4(0,0,0,1));
             continue;
@@ -129,7 +115,10 @@ window.onload = function init()
        5, 4, 0, 0, 1, 5,   // left face
        ];
     //Add the indices for drawing the triangles on top of the board.
-    
+    for(var i = 8; i<index;i++){
+        indices.push(i);
+    }
+    console.log('indices: ' + indices);
     theta[0] = 0.0;
     theta[1] = 0.0;
     theta[2] = 0.0;
