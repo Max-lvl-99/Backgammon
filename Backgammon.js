@@ -12,8 +12,10 @@ var theta = [];
 var angles  = [];
 var c = [];
 var s = [];
+var colors = [];
 
 var cubeSize = 10;
+var cubeHeight = 1;
 var cubeSize2 = cubeSize / 2.0;
 var windowMin = -cubeSize2;
 var windowMax = cubeSize + cubeSize2;
@@ -30,6 +32,8 @@ var modelView;
 var shadowProjection;
 var aspect;
 
+var index=0;
+
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
@@ -40,23 +44,40 @@ window.onload = function init()
     // Load vertices and colors for cube faces
     
     vertices = [
+    //game board
        vec4(0.0, 0.0, cubeSize, 1.0),
-       vec4(0.0, 1, cubeSize, 1.0),
-       vec4(cubeSize, 1, cubeSize, 1.0),
+       vec4(0.0, cubeHeight, cubeSize, 1.0),
+       vec4(cubeSize, cubeHeight, cubeSize, 1.0),
        vec4(cubeSize, 0.0, cubeSize, 1.0),
        vec4(0.0, 0.0, 0.0, 1.0),
-       vec4(0.0, 1, 0.0, 1.0),
-       vec4(cubeSize, 1, 0.0, 1.0),
+       vec4(0.0, cubeHeight, 0.0, 1.0),
+       vec4(cubeSize, cubeHeight, 0.0, 1.0),
        vec4(cubeSize, 0.0, 0.0, 1.0)
     ];
-     colors = [
-        vec4(1, 1, 1, 1.0),  //whhite
-        vec4(1, 1, 1, 1.0),  //whhite
-        vec4(1, 1, 1, 1.0),  //whhite
-        vec4(1, 1, 1, 1.0),  //whhite
-        vec4(1, 1, 1, 1.0),  //whhite
-        vec4(1, 1, 1, 1.0),  //whhite
-    ];
+    index= index+8;
+       //draw triangles (these will be number 8 - 44 indices)
+        for(i=0;i<12;i++){
+            vertices.push(vec4((1/28)+i*(cubeSize*(1/14)), cubeHeight, 0, 1.0));
+            vertices.push(vec4((3/28)+i*(cubeSize*(1/14)), cubeHeight, 0, 1.0));
+            vertices.push(vec4((1/14)+i*(cubeSize*(1/14)), cubeHeight,(7/16)*cubeSize, 1.0));
+            index= index+3;
+        } //below are indices 45 - 81
+        for(i=0;i<12;i++){
+            vertices.push(vec4((1/28)+i*(cubeSize*(1/14)), cubeHeight, cubeSize, 1.0));
+            vertices.push(vec4((3/28)+i*(cubeSize*(1/14)), cubeHeight, cubeSize, 1.0));
+            vertices.push(vec4((1/14)+i*(cubeSize*(1/14)), cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
+            index=index+3;
+        }
+
+    //Make colors for the cube (6 sides, but actually 12 triangles)
+    for(i=0;i<12;i++){
+        colors.push(vec4(1.0,1.0,0,1.0));
+    } //Draw grey triangles.
+    for(i=0;i<24;i++){
+        if(i%2==0){
+            colors.push(vec4(.6,0,.6,1.0));
+        } else { colors.push(vec4(.3,0,.3,1.0)); }
+    }
     
     // Load indices to represent the triangles that will draw each face
     
@@ -66,8 +87,13 @@ window.onload = function init()
        3, 0, 4, 4, 7, 3,  // bottom face
        6, 5, 1, 1, 2, 6,  // top face
        4, 5, 6, 6, 7, 4,  // back face
-       5, 4, 0, 0, 1, 5   // left face
-    ];
+       5, 4, 0, 0, 1, 5,   // left face
+       //Below we draw the triangles on top of the board
+       8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,
+       31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,
+       54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,
+       77,78,79,80,81
+       ];
     
     theta[0] = 0.0;
     theta[1] = 0.0;
@@ -158,23 +184,24 @@ function render()
     modelView = mult(looking, mult(tz2, mult (rotation, tz1)));
     gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv (projectionLoc, false, flatten(projection));
-    for (var i=0; i<6; i++) {
-        gl.uniform4fv (colorLoc, colors[i]);
-        gl.drawElements( gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 6*i );
+    
+    for (var i=0; i<index; i=i+3) {
+        gl.uniform4fv (colorLoc, colors[i/3]);
+        gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i );
     }
     
-    // Do the shadow.
-    shadowProjection = mat4();
-    shadowProjection[3][3] = 0;
-    shadowProjection[3][1] = -1/light[1];
-    modelView = mult(modelView, translate(light[0], light[1], light[2]));
-    modelView = mult(modelView, shadowProjection);
-    modelView = mult(modelView, translate(-light[0], -light[1], -light[2]));
-    gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
-    gl.uniform4fv(colorLoc, shadowColor);
-    for (var i=0; i<6; i++){
-        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 6*i);
-    }
+    // // Do the shadow.
+    // shadowProjection = mat4();
+    // shadowProjection[3][3] = 0;
+    // shadowProjection[3][1] = -1/light[1];
+    // modelView = mult(modelView, translate(light[0], light[1], light[2]));
+    // modelView = mult(modelView, shadowProjection);
+    // modelView = mult(modelView, translate(-light[0], -light[1], -light[2]));
+    // gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
+    // gl.uniform4fv(colorLoc, shadowColor);
+    // for (var i=0; i<index; i+=3){
+    //     gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i);
+    // }
 
     requestAnimFrame (render);
 };

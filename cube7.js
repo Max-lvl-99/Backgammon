@@ -164,17 +164,17 @@ function render()
 	}
 	
 	// Do the shadow.
-	shadowProjection = mat4();
-	shadowProjection[3][3] = 0;
-    shadowProjection[3][1] = -1/light[1];
-    modelView = mult(modelView, translate(light[0], light[1], light[2]));
-    modelView = mult(modelView, shadowProjection);
-    modelView = mult(modelView, translate(-light[0], -light[1], -light[2]));
-	gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
- 	gl.uniform4fv(colorLoc, shadowColor);
- 	for (var i=0; i<6; i++){
-		gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 6*i);
-	}
+	// shadowProjection = mat4();
+	// shadowProjection[3][3] = 0;
+ //    shadowProjection[3][1] = -1/light[1];
+ //    modelView = mult(modelView, translate(light[0], light[1], light[2]));
+ //    modelView = mult(modelView, shadowProjection);
+ //    modelView = mult(modelView, translate(-light[0], -light[1], -light[2]));
+	// gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
+ // 	gl.uniform4fv(colorLoc, shadowColor);
+ // 	for (var i=0; i<6; i++){
+	// 	gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, 6*i);
+	// }
 
 	requestAnimFrame (render);
 };
