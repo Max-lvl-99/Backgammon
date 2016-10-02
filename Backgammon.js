@@ -56,18 +56,10 @@ window.onload = function init()
        vec4(cubeSize, cubeHeight, 0.0, 1.0),
        vec4(cubeSize, 0.0, 0.0, 1.0)
     ];
-    index= index+8;
+    index=36;
     var x1; var x2;
-        // for(i=0;i<13;i++){
-        //     x1=(1/28)+i*(cubeSize*(1/14));
-        //     x2=(1/28)+(i+1)*(cubeSize*(1/14));
-        //     vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
-        //     vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
-        //     vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
-        //     index=index+3;
-        // }
        //draw triangles (top row)
-        for(i=0;i<13;i++){
+        for(var i=0;i<13;i++){
             x1 = (3/28)+i*(cubeSize*(1/14));
             x2=(3/28)+(i+1)*(cubeSize*(1/14));
             //draw the bar in the middle
@@ -81,18 +73,18 @@ window.onload = function init()
                 //this is the middle vertex of the triangle
                 vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
                 vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
-                index = index+6;
+                index=index+6;
                 continue;
             }
             vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
             vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
             //this is the middle vertex of the triangle
             vertices.push(vec4((x1+x2)/2, cubeHeight,(7/16)*cubeSize, 1.0));
-            index = index+3;
+            index=index+3;
         } //draw triangles (bottom row)
-        for(i=0;i<13;i++){
-            x1=(1/28)+i*(cubeSize*(1/14));
-            x2=(1/28)+(i+1)*(cubeSize*(1/14));
+        for(var i=0;i<13;i++){
+            x1 = (3/28)+i*(cubeSize*(1/14));
+            x2=(3/28)+(i+1)*(cubeSize*(1/14));
             vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
             vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
             vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
@@ -100,17 +92,17 @@ window.onload = function init()
         }
 
     //Make colors for the cube (6 sides, but actually 12 triangles)
-    for(i=0;i<12;i++){
+    for(var i=0;i<12;i++){
         colors.push(vec4(1.0,1.0,0,1.0));
-    } //Draw grey triangles.
-    for(i=12;i<index;i++){
+    } //color triangles.
+    for(var i=12;i<index;i++){
         if(i==18){
             colors.push(vec4(0,0,0,1));
             colors.push(vec4(0,0,0,1));
-            continue;
+            i++;    
+            // continue;
         }
-        if(i%2==0){
-            colors.push(vec4(.6,0,.6,1.0));
+        if(i%2==0){colors.push(vec4(.6,0,.6,1.0));
         } else { colors.push(vec4(.3,0,.3,1.0)); }
     }
     
@@ -127,7 +119,7 @@ window.onload = function init()
     for(var i = 8; i<index;i++){
         indices.push(i);
     }
-    console.log('indices: ' + indices);
+
     theta[0] = 90.0;
     theta[1] = 0.0;
     theta[2] = 0.0;
@@ -177,6 +169,10 @@ window.onload = function init()
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, iBuffer);
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
     
+        console.log('index: ' + index);
+    console.log('vertices.length: ' + vertices.length);
+    console.log('indices.length: ' + indices.length + ' indices: ' + indices);
+    console.log('colors.length: ' + colors.length + ' colors: ' + colors);
     render();
 };
 
@@ -224,7 +220,7 @@ function render()
     modelView = mult(looking, mult(tz2, mult (rotation, tz1)));
     gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
     gl.uniformMatrix4fv (projectionLoc, false, flatten(projection));
-    
+    index=indices.length;
     for (var i=0; i<index; i=i+3) {
         gl.uniform4fv (colorLoc, colors[i/3]);
         gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i );
