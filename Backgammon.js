@@ -33,79 +33,22 @@ var projection;
 var modelView;
 var shadowProjection;
 var aspect;
-
+var x1; var x2;
 var index=0;
+//These are the triangles that the pieces are on.
+//true is one color, false is another color
+var slots = [];
 
 window.onload = function init()
 {
     canvas = document.getElementById( "gl-canvas" );
-    
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
-    // Load vertices and colors for cube faces
-    
-    vertices = [
-    //game board
-       vec4(0.0, 0.0, cubeSize, 1.0),
-       vec4(0.0, cubeHeight, cubeSize, 1.0),
-       vec4(cubeSize, cubeHeight, cubeSize, 1.0),
-       vec4(cubeSize, 0.0, cubeSize, 1.0),
-       vec4(0.0, 0.0, 0.0, 1.0),
-       vec4(0.0, cubeHeight, 0.0, 1.0),
-       vec4(cubeSize, cubeHeight, 0.0, 1.0),
-       vec4(cubeSize, 0.0, 0.0, 1.0)
-    ];
-    index=36;
-    var x1; var x2;
-       //draw triangles (top row)
-        for(var i=0;i<13;i++){
-            x1 = (3/28)+i*(cubeSize*(1/14));
-            x2=(3/28)+(i+1)*(cubeSize*(1/14));
-            //draw the bar in the middle
-            if(i==6){            
-                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
-                //this is the middle vertex of the triangle
-                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-                //Draw the other triangle to make a rectangle
-                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-                //this is the middle vertex of the triangle
-                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
-                vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
-                index=index+6;
-                continue;
-            }
-            vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
-            vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
-            //this is the middle vertex of the triangle
-            vertices.push(vec4((x1+x2)/2, cubeHeight,(7/16)*cubeSize, 1.0));
-            index=index+3;
-        } //draw triangles (bottom row)
-        for(var i=0;i<13;i++){
-            x1 = (3/28)+i*(cubeSize*(1/14));
-            x2=(3/28)+(i+1)*(cubeSize*(1/14));
-            vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
-            vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
-            vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
-            index=index+3;
-        }
+    drawSquare();
+    drawTriangles();
+    drawPieces();
 
-    //Make colors for the cube (6 sides, but actually 12 triangles)
-    for(var i=0;i<12;i++){
-        colors.push(vec4(1.0,1.0,0,1.0));
-    } //color triangles.
-    for(var i=12;i<index;i++){
-        if(i==18){
-            colors.push(vec4(0,0,0,1));
-            colors.push(vec4(0,0,0,1));
-            i++;    
-            // continue;
-        }
-        if(i%2==0){colors.push(vec4(.6,0,.6,1.0));
-        } else { colors.push(vec4(.3,0,.3,1.0)); }
-    }
-    
     // Load indices to represent the triangles that will draw each face
     indices = [
        1, 0, 3, 3, 2, 1,  // front face
@@ -131,23 +74,7 @@ window.onload = function init()
     gl.enable(gl.DEPTH_TEST);
     //projection = ortho (windowMin, windowMax, windowMin, windowMax, windowMin, windowMax+cubeSize);
     // Register event listeners for the buttons
-    
-    var aCW=document.getElementById ("XButtonCW");
-    aCW.addEventListener ("click", function() { CW=true;axis = xAxis; });
-    var aCCW=document.getElementById ("XButtonCCW");
-    aCCW.addEventListener ("click", function() { CW=false;axis = xAxis; });
-    var bCW=document.getElementById ("YButtonCW");
-    bCW.addEventListener ("click", function () { CW=true;axis = yAxis; });
-    var bCCW=document.getElementById ("YButtonCCW");
-    bCCW.addEventListener ("click", function () { CW=false;axis = yAxis; });
-    var cCW=document.getElementById ("ZButtonCW");
-    cCW.addEventListener ("click", function () { CW=true;axis = zAxis; });
-    var cCCW=document.getElementById ("ZButtonCCW");
-    cCCW.addEventListener ("click", function () { CW=false;axis = zAxis; });
-    var d=document.getElementById ("Reset");
-    d.addEventListener ("click", function () { theta = [90, 0.0, 0.0]; axis = xAxis; });
-    var e=document.getElementById ("StartStop");
-    e.addEventListener ("click", function () { rotate = !rotate; });
+    buttonAffects();
 
     //  Load shaders and initialize attribute buffers
     var program = initShaders( gl, "vertex-shader", "fragment-shader" );
@@ -169,15 +96,14 @@ window.onload = function init()
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, iBuffer);
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
     
-        console.log('index: ' + index);
-    console.log('vertices.length: ' + vertices.length);
-    console.log('indices.length: ' + indices.length + ' indices: ' + indices);
-    console.log('colors.length: ' + colors.length + ' colors: ' + colors);
+    //     console.log('index: ' + index);
+    // console.log('vertices.length: ' + vertices.length);
+    // console.log('indices.length: ' + indices.length + ' indices: ' + indices);
+    // console.log('colors.length: ' + colors.length + ' colors: ' + colors);
     render();
 };
 
-function render()
-{
+function render() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (rotate) {
         if(CW){theta[axis] =theta[axis] - .5;}
@@ -225,19 +151,95 @@ function render()
         gl.uniform4fv (colorLoc, colors[i/3]);
         gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i );
     }
-    
-    // // Do the shadow.
-    // shadowProjection = mat4();
-    // shadowProjection[3][3] = 0;
-    // shadowProjection[3][1] = -1/light[1];
-    // modelView = mult(modelView, translate(light[0], light[1], light[2]));
-    // modelView = mult(modelView, shadowProjection);
-    // modelView = mult(modelView, translate(-light[0], -light[1], -light[2]));
-    // gl.uniformMatrix4fv (modelViewLoc, false, flatten(modelView));
-    // gl.uniform4fv(colorLoc, shadowColor);
-    // for (var i=0; i<index; i+=3){
-    //     gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i);
-    // }
 
     requestAnimFrame (render);
 };
+
+function drawPieces() {
+
+}
+
+function drawTriangles() {
+       //draw triangles (top row from left to right)
+        for(var i=0;i<13;i++){
+            x1 = i*(cubeSize*(1/13));
+            x2=(i+1)*(cubeSize*(1/13));
+            //draw the bar in the middle
+            if(i==6){            
+                vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                //Draw the other triangle to make a rectangle
+                vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+                //this is the middle vertex of the triangle
+                vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+                vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
+                index=index+6;
+                continue;
+            }
+            vertices.push(vec4(x1, cubeHeight+.01, 0, 1.0));
+            vertices.push(vec4(x2, cubeHeight+.01, 0, 1.0));
+            //this is the middle vertex of the triangle
+            vertices.push(vec4((x1+x2)/2, cubeHeight,(7/16)*cubeSize, 1.0));
+            index=index+3;
+        } //draw triangles (bottom row from left to right)
+        for(var i=0;i<13;i++){
+            x1 =i*(cubeSize*(1/13));
+            x2=(i+1)*(cubeSize*(1/13));
+            vertices.push(vec4(x1, cubeHeight+.01, cubeSize, 1.0));
+            vertices.push(vec4(x2, cubeHeight+.01, cubeSize, 1.0));
+            vertices.push(vec4((x1+x2)/2, cubeHeight, cubeSize-(7/16)*cubeSize, 1.0));
+            index=index+3;
+        }
+
+    //color triangles.
+    for(var i=12;i<index;i++){
+        if(i==18){
+            colors.push(vec4(0,0,0,1));
+            colors.push(vec4(0,0,0,1));
+            i++;    
+            // continue;
+        }
+        if(i%2==0){colors.push(vec4(.75,0,.75,1.0));
+        } else { colors.push(vec4(.35,0,.35,1.0)); }
+    }
+};
+
+function drawSquare(){
+    vertices = [
+    //game board
+       vec4(0.0, 0.0, cubeSize, 1.0),
+       vec4(0.0, cubeHeight, cubeSize, 1.0),
+       vec4(cubeSize, cubeHeight, cubeSize, 1.0),
+       vec4(cubeSize, 0.0, cubeSize, 1.0),
+       vec4(0.0, 0.0, 0.0, 1.0),
+       vec4(0.0, cubeHeight, 0.0, 1.0),
+       vec4(cubeSize, cubeHeight, 0.0, 1.0),
+       vec4(cubeSize, 0.0, 0.0, 1.0)
+    ];
+    index=36;
+    //Make colors for the cube (6 sides, but actually 12 triangles)
+    for(var i=0;i<12;i++){
+        colors.push(vec4(1.0,1.0,0,1.0));
+    } 
+}
+
+function buttonAffects(){
+    var aCW=document.getElementById ("XButtonCW");
+    aCW.addEventListener ("click", function() { CW=true;axis = xAxis; });
+    var aCCW=document.getElementById ("XButtonCCW");
+    aCCW.addEventListener ("click", function() { CW=false;axis = xAxis; });
+    var bCW=document.getElementById ("YButtonCW");
+    bCW.addEventListener ("click", function () { CW=true;axis = yAxis; });
+    var bCCW=document.getElementById ("YButtonCCW");
+    bCCW.addEventListener ("click", function () { CW=false;axis = yAxis; });
+    var cCW=document.getElementById ("ZButtonCW");
+    cCW.addEventListener ("click", function () { CW=true;axis = zAxis; });
+    var cCCW=document.getElementById ("ZButtonCCW");
+    cCCW.addEventListener ("click", function () { CW=false;axis = zAxis; });
+    var d=document.getElementById ("Reset");
+    d.addEventListener ("click", function () { theta = [90, 0.0, 0.0]; axis = xAxis; });
+    var e=document.getElementById ("StartStop");
+    e.addEventListener ("click", function () { rotate = !rotate; });
+}
