@@ -5,6 +5,14 @@
 <title>Backgammon</title>
 
 <p>
+<button id="rollDice">Roll the Dice!</button>
+<text id="die1Value"></text>
+<text id="die2Value"></text>
+<text>Enter a number which is the slot that contains the checker you want to move.</text>
+<input type="number" id="slotToMoveFrom">
+<button id="die1">Move the checker based on the die 1 value.</button>
+<button id="die2">Move the checker based on the die 2 value.</button>
+<button id="makeMove">Move the Checker!</button>
 <button id="XButtonCW">Rotate x-axis CW</button>
 <button id="XButtonCCW">Rotate x-axis CCW</button>
 <button id="YButtonCW">Rotate y-axis CW</button>
@@ -46,7 +54,7 @@ main()
 </head>   
 
 <body>
-<canvas id="gl-canvas" width="500" height="500">
+<canvas id="gl-canvas" width="600" height="600">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>
 </body>
