@@ -38,8 +38,8 @@ var index=0;
 //These are the triangles that the pieces are on.
 //true is one color, false is another color
 var slots = [];
-var die1;
-var die2;
+var die1=0;
+var die2=0;
 //When its the first turn to move, player can determine by die1 or die1 amount.
 var moveDie1Amount;
 var currentPlayer=true;
@@ -205,9 +205,6 @@ function drawTriangles() {
         if(i%2==0){colors.push(vec4(.75,0,.75,1.0));
         } else { colors.push(vec4(.35,0,.35,1.0)); }
     }
-    console.log('colors.length: ' + colors.length + 
-        ' vertices.length: ' + vertices.length + 
-        ' index: ' + index);
 };
 
 function drawSquare(){
@@ -258,6 +255,7 @@ function initSlots() {
         [],
         [false, false] // slot 24
     ];
+    console.log('end of initSlots().  slots = ' + slots);
 }
  
  
@@ -277,7 +275,6 @@ function drawPieces() {
                     sqWidth = sqWidthMax;
                     sqSpace = sqSpaceMax;
                 }
-                console.log("Width: " + sqWidth, "Space: " + sqSpace);
                 for (ch = 0; ch < slots[i].length; ch += 1) {
                     v2 = vec4((x2 + x1) / 2 - sqWidth / 2, cubeHeight + 0.02, sqWidth * ch + sqSpace * (ch + 1), 1.0);
                     v1 = vec4((x2 + x1) / 2 + sqWidth / 2, cubeHeight + 0.02, sqWidth * ch + sqSpace * (ch + 1), 1.0);
@@ -317,7 +314,6 @@ function drawPieces() {
                 sqWidth = sqWidthMax;
                 sqSpace = sqSpaceMax;
             }
-            console.log("Width: " + sqWidth, "Space: " + sqSpace);
             for (ch = 0; ch < slots[i+13].length; ch += 1) {
                 v1 = vec4(cubeSize - ((x2 + x1) / 2 - sqWidth / 2), cubeHeight + 0.02, cubeSize - (sqWidth * ch + sqSpace * (ch + 1)), 1.0);
                 v2 = vec4(cubeSize - ((x2 + x1) / 2 + sqWidth / 2), cubeHeight + 0.02, cubeSize - (sqWidth * ch + sqSpace * (ch + 1)), 1.0);
@@ -336,10 +332,7 @@ function drawPieces() {
                 } else {
                     colors.push(vec4(0, 0, 0, 1.0));
                     colors.push(vec4(0, 0, 0, 1.0));
-                }
- 
-                console.log("Spot " + i + ":", v1, v2, v3, v4);
- 
+                } 
             }
         }
  
@@ -348,11 +341,35 @@ function drawPieces() {
 
 //Does not actual start the move.  The user must click "Move Checker" button to move checker
 function rollDice(){
-    if(die1!=0 || die2!=0){}
+    if(die1!=0 || die2!=0){
+        alert("You've already rolled the dice!  Either move a piece " + 
+            "or skip your turn!");
+    }
     die1=Math.ceil(Math.random()*6);
     die2=Math.ceil(Math.random()*6);
+    displayDiceRolls();
+}
+
+function displayDiceRolls(){
+    if(die1==0 && die2==0){
+        document.getElementById("die1Value").innerHTML = "";
+        document.getElementById("die2Value").innerHTML = "";
+        return;
+    }
     document.getElementById("die1Value").innerHTML = "Die 1 rolled a " + die1 +"!!";
     document.getElementById("die2Value").innerHTML = "  Die 2 rolled a " + die2+"!!";
+}
+
+function switchPlayers(){
+    currentPlayer=!currentPlayer;
+    if(currentPlayer){
+        document.getElementById("playerTurn").innerHTML = "Player 1 " + 
+        "(White Checkers) Turn!!";
+    } else {
+        document.getElementById("playerTurn").innerHTML = "Player 2 " + 
+        "(Black Checkers) Turn!!";
+    }
+
 }
 
 function makeMove(){
@@ -369,14 +386,14 @@ function makeMove(){
     //next two if's check if only one die is left to move
     if(die1!=0 && die2==0){spacesToMove=die1; die1=0;}
     else if(die2!=0 && die1==0){spacesToMove=die2; die2=0;}
-    else if(this.moveDie1Amount){ spacesToMove = die1; die1=0;} 
-    else if(!this.moveDie1Amount){ spacesToMove=die2; die2=0;} 
+    else if(moveDie1Amount){ spacesToMove = die1; die1=0;} 
+    else if(!moveDie1Amount){ spacesToMove=die2; die2=0;} 
     else { alert("Something went wrong!!"); return; }
     //We need to skip over the two slots for the bar in the middle, so this function does that
     var newSlot=calculateNewSlot(slotToMoveFrom, spacesToMove);
     //Now we actually have to move the checker to the new slot
     if(slots[newSlot].length!=0){
-        if(slots[newSlot][0]!=this.currentPlayer){
+        if(slots[newSlot][0]!=currentPlayer){
         //We know that there is at least one of the opponent's checkers in this slot.  If it is only one
         //checker, we bump this checker into the middle bar of the board.
             if(slots[newSlot].length==1){ bumpToMiddle(!currentPlayer); checkerMoved=true;
@@ -386,22 +403,32 @@ function makeMove(){
         }
     }
     var getNewSlot = slots[newSlot];
-    getNewSlot = getNewSlot.push(this.currentPlayer);
+    console.log('adding new slot to player.  currentPlayer: ' + currentPlayer);
+    getNewSlot = getNewSlot.push(currentPlayer);
     slots[newSlot]=getNewSlot;
     var oldSlotArr = slots[slotToMoveFrom];
     oldSlotArr = oldSlotArr.splice(0, oldSlotArr.length-1);
     slots[slotToMoveFrom] = oldSlotArr;
+    console.log('end of makeMove().  slots: ' + slots);
 }
 
 function bumpToMiddle(enemyPlayer){
     slots[6].push(enemyPlayer);
 }
 
+function displayMovedByDieX(){
+    if(moveDie1Amount){
+        document.getElementById("dieToMove").innerHTML = "Checker will move based on the die 1 value.";
+    } else {
+        document.getElementById("dieToMove").innerHTML = "Checker will move based on the die 2 value.";
+    }
+}
+
 //We need to make sure we skip over the two slots that hold the vertical bar through the middle of the 
 //board when we are moving the checker pieces.
 function calculateNewSlot(slotToMoveFrom, spacesToMove){
     //this means we cross over the first bar index in slots
-    if(slotToMoveFrom<this.bar1SlotNum && (slotToMoveFrom+spacesToMove)>=bar1SlotNum){
+    if(slotToMoveFrom<bar1SlotNum && (slotToMoveFrom+spacesToMove)>=bar1SlotNum){
         return slotToMoveFrom+spacesToMove+1;
     } if(slotToMoveFrom<bar2SlotNum && (slotToMoveFrom+spacesToMove)>=bar2SlotNum){
         return slotToMoveFrom+spacesToMove+1;
@@ -410,12 +437,17 @@ function calculateNewSlot(slotToMoveFrom, spacesToMove){
 }
 
 function buttonAffects(){
+    var sT=document.getElementById ("skipTurn");
+    sT.addEventListener ("click", function () { die1=0; die2=0; displayDiceRolls(); 
+        switchPlayers(); });
     var mM=document.getElementById ("makeMove");
-    mM.addEventListener ("click", function () { makeMove(); });
+    mM.addEventListener ("click", function () { makeMove(); switchPlayers();});
     var mD1=document.getElementById ("die1");
-    mD1.addEventListener ("click", function () { this.moveDie1Amount=true; });
+    mD1.addEventListener ("click", function () { moveDie1Amount=true; 
+        displayMovedByDieX(); });
     var mD2=document.getElementById ("die2");
-    mD2.addEventListener ("click", function () { this.moveDie1Amount=false; });
+    mD2.addEventListener ("click", function () { moveDie1Amount=false; 
+        displayMovedByDieX(); });
     var rD=document.getElementById ("rollDice");
     rD.addEventListener ("click", function () { rollDice(); });
     var aCW=document.getElementById ("XButtonCW");
