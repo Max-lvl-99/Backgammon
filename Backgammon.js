@@ -28,6 +28,7 @@ var axis = 0;
 var rotate = false;
 //Determines CW or CCW rotation
 var CW;
+var firstTimeThrough = true;
 
 var projection;
 var modelView;
@@ -46,6 +47,7 @@ var currentPlayer=true;
 //these two vars are the indices in slots where the bars are.  When moving checkes skip over these.
 var bar1SlotNum=6;
 var bar2SlotNum=18;
+var numCheckersOnBoard=30;
 
 window.onload = function init()
 {
@@ -56,6 +58,13 @@ window.onload = function init()
 
     drawSquare();
     drawTriangles();
+
+    for(var i=0;i<numCheckersOnBoard;i++){
+        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
+        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
+        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
+        colors.push(vec4(1, 1, 1, 1.0)); colors.push(vec4(1, 1, 1, 1.0));
+    }
     drawPieces();
 
     // Load indices to represent the triangles that will draw each face
@@ -104,14 +113,17 @@ window.onload = function init()
     var iBuffer = gl.createBuffer();
     gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, iBuffer);
     gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
-    
+    console.log('vertices.length: ' + vertices.length);
+
+    console.log('after for loop vertices.length: ' + vertices.length);
     render();
 };
 
 function render() {
+    console.log('render() called');
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (rotate) {
-        if(CW){theta[axis] =theta[axis] - .5;}
+        if(CW){theta[axis] = theta[axis] - .5;}
         else{theta[axis] += 0.5;}
     }
     for (i=0; i<3; i++) {
@@ -156,7 +168,6 @@ function render() {
         gl.uniform4fv (colorLoc, colors[i/3]);
         gl.drawElements( gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i );
     }
-
     requestAnimFrame (render);
 };
 
@@ -227,6 +238,7 @@ function drawSquare(){
 }
 
 function initSlots() {
+    if(!firstTimeThrough){ return; }
     slots = [
         [true, true], //slot 1
         [], //slot 2
@@ -255,11 +267,21 @@ function initSlots() {
         [],
         [false, false] // slot 24
     ];
+    firstTimeThrough=false;
+    //To initialize we need to push dummy vertices so that in drawPieces() we can remove them
+    //as if the board is already drawn.
     console.log('end of initSlots().  slots = ' + slots);
 }
  
  
 function drawPieces() {
+    //To re-draw the checkers we must remove their old vertices
+    for(var i =0; i<numCheckersOnBoard;i++){
+        vertices.pop(); vertices.pop(); vertices.pop(); vertices.pop();
+        vertices.pop(); vertices.pop();
+           colors.pop();   colors.pop();
+    }
+    console.log('drawPieces() vertices.length: ' + vertices.length);
     var sqWidth, color, v1, v2, v3, v4, ch, i;
     for (i = 0; i < 13; i++) {
         x1 = i * (cubeSize * (1 / 13));
@@ -324,7 +346,7 @@ function drawPieces() {
                 vertices.push(v3);
                 vertices.push(v3);
                 vertices.push(v4);
-               vertices.push(v1);
+                vertices.push(v1);
                 index = index + 6;
                 if (color) {
                     colors.push(vec4(1, 1, 1, 1.0));
@@ -398,18 +420,19 @@ function makeMove(){
         //checker, we bump this checker into the middle bar of the board.
             if(slots[newSlot].length==1){ bumpToMiddle(!currentPlayer); checkerMoved=true;
                 //Reset this array since we removed the only piece
-                slots[newSlot] = []; }
+                slots[newSlot] = []; 
+            }
             else{ alert("You aren't allowed to move to this location!  Too many enemy forces!!");  return; }
         }
     }
     var getNewSlot = slots[newSlot];
-    console.log('adding new slot to player.  currentPlayer: ' + currentPlayer);
-    getNewSlot = getNewSlot.push(currentPlayer);
+    getNewSlot.push(currentPlayer);
     slots[newSlot]=getNewSlot;
     var oldSlotArr = slots[slotToMoveFrom];
     oldSlotArr = oldSlotArr.splice(0, oldSlotArr.length-1);
     slots[slotToMoveFrom] = oldSlotArr;
-    console.log('end of makeMove().  slots: ' + slots);
+    window.onload();
+    console.log('end of makeMove().  slots: ' + slots + ' vertices.length: ' + vertices.length);
 }
 
 function bumpToMiddle(enemyPlayer){
