@@ -46,9 +46,9 @@ var moveDie1Amount;
 var currentPlayer = true;
 //these two vars are the indices in slots where the bars are.  When moving checkes skip over these.
 
-var bar1SlotNum=6;
-var bar2SlotNum=18;
-var numCheckersOnBoard=30;
+var bar1SlotNum = 6;
+var bar2SlotNum = 18;
+var numCheckersOnBoard = 30;
 
 
 window.onload = function init() {
@@ -58,23 +58,25 @@ window.onload = function init() {
     if (!gl) { alert("WebGL isn't available"); }
 
     drawSquare();
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length,  "Index: " + index, "Colors.length: " + colors.length);
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
     drawTriangles();
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
-
-    for(var i=0;i<numCheckersOnBoard;i++){
-        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
-        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
-        vertices.push(vec4(1,1,1,1)); vertices.push(vec4(1,1,1,1));
+    for (var i = 0; i < numCheckersOnBoard; i++) {
+        vertices.push(vec4(1, 1, 1, 1)); vertices.push(vec4(1, 1, 1, 1));
+        vertices.push(vec4(1, 1, 1, 1)); vertices.push(vec4(1, 1, 1, 1));
+        vertices.push(vec4(1, 1, 1, 1)); vertices.push(vec4(1, 1, 1, 1));
         colors.push(vec4(1, 1, 1, 1.0)); colors.push(vec4(1, 1, 1, 1.0));
+        // index += 6;
     }
 
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length,  "Index: " + index, "Colors.length: " + colors.length);
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     drawPieces();
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length,  "Index: " + index, "Colors.length: " + colors.length);
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     // Load indices to represent the triangles that will draw each face
+    indices = [];
     indices = [
         1, 0, 3, 3, 2, 1,  // front face
         2, 3, 7, 7, 6, 2,  // right face
@@ -83,10 +85,14 @@ window.onload = function init() {
         4, 5, 6, 6, 7, 4,  // back face
         5, 4, 0, 0, 1, 5,   // left face
     ];
+
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
     //Add the indices for drawing the triangles on top of the board.
     for (var i = 8; i < index; i++) {
         indices.push(i);
     }
+
+    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     theta[0] = 90.0;
     theta[1] = 0.0;
@@ -119,11 +125,11 @@ window.onload = function init() {
 
     var iBuffer = gl.createBuffer();
 
-    gl.bindBuffer( gl.ELEMENT_ARRAY_BUFFER, iBuffer);
-    gl.bufferData( gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
-    console.log('vertices.length: ' + vertices.length);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(indices), gl.STATIC_DRAW);
+    //console.log('vertices.length: ' + vertices.length);
 
-    console.log('after for loop vertices.length: ' + vertices.length);
+    //console.log('after for loop vertices.length: ' + vertices.length);
 
 
     render();
@@ -131,11 +137,11 @@ window.onload = function init() {
 
 function render() {
 
-    console.log('render() called');
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    //console.log('render() called');
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (rotate) {
-        if(CW){theta[axis] = theta[axis] - .5;}
-        else{theta[axis] += 0.5;}
+        if (CW) { theta[axis] = theta[axis] - .5; }
+        else { theta[axis] += 0.5; }
 
     }
     for (i = 0; i < 3; i++) {
@@ -178,13 +184,32 @@ function render() {
     //index = vertices.length;
     //console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length,  "Index: " + index, "Colors.length: " + colors.length);
     for (var i = 0; i < index; i = i + 3) {
+        // console.log("Drawing: " + i, i + 1, i + 2, " out of : " + index);
+        // console.log("Color: " + colors[i/3], i/3+1 + " of " + colors.length);
+        // console.log(vertices[indices[i]], vertices[indices[i+1]], vertices[indices[i+2]]);
         gl.uniform4fv(colorLoc, colors[i / 3]);
         gl.drawElements(gl.TRIANGLES, 3, gl.UNSIGNED_BYTE, i);
     }
-
-    requestAnimFrame (render);
+    // if(iMax > index){
+    //     iMax = index;
+    // } else {
+    //     iMax += 3;
+    //     pauseBrowser(100);
+    // }
+    
+    requestAnimFrame(render);
 
 };
+var iMax = 0;
+
+function pauseBrowser(millis) {
+    var date = Date.now();
+    var curDate = null;
+    do {
+        curDate = Date.now();
+    } while (curDate-date < millis);
+}
+
 
 function drawTriangles() {
     //draw triangles (top row from left to right)
@@ -199,7 +224,7 @@ function drawTriangles() {
             vertices.push(vec4(x2, cubeHeight + .01, 0, 1.0));
             //Draw the other triangle to make a rectangle
             index = index + 3;
-            colors.push(vec4(0, 0, 0, 1));
+            colors.push(vec4(1, 0.5, 0.5, 1));
             continue;
         }
         vertices.push(vec4(x1, cubeHeight + .01, 0, 1.0));
@@ -220,7 +245,7 @@ function drawTriangles() {
             vertices.push(vec4(x1, cubeHeight + .01, cubeSize, 1.0));
             vertices.push(vec4(x2, cubeHeight + .01, cubeSize, 1.0));
             index = index + 3;
-            colors.push(vec4(0, 0, 0, 1));
+            colors.push(vec4(1, 0.5, 0.5, 1));
             continue;
         }
         vertices.push(vec4(x1, cubeHeight + .01, cubeSize, 1.0));
@@ -278,7 +303,7 @@ function drawSquare() {
 }
 
 function initSlots() {
-    if(!firstTimeThrough){ return; }
+    if (!firstTimeThrough) { return; }
     slots = [
         [true, true], //slot 1
         [], //slot 2
@@ -292,8 +317,8 @@ function initSlots() {
         [],
         [],
         [],
-        [true, true, true, true, true], // slot 12
-        [false, false, false, false, false], // slot 13 (opposite side, same end)
+        [true, true, true, true], // slot 12
+        [false, false, false, false], // slot 13 (opposite side, same end)
         [],
         [],
         [],
@@ -308,20 +333,20 @@ function initSlots() {
         [false, false] // slot 24
     ];
 
-    firstTimeThrough=false;
+    firstTimeThrough = false;
     //To initialize we need to push dummy vertices so that in drawPieces() we can remove them
     //as if the board is already drawn.
-    console.log('end of initSlots().  slots = ' + slots);
+    // console.log('end of initSlots().  slots = ' + slots);
 
 }
 
 
 function drawPieces() {
     //To re-draw the checkers we must remove their old vertices
-    for(var i =0; i<numCheckersOnBoard;i++){
+    for (var i = 0; i < numCheckersOnBoard; i++) {
         vertices.pop(); vertices.pop(); vertices.pop(); vertices.pop();
         vertices.pop(); vertices.pop();
-           colors.pop();   colors.pop();
+        colors.pop(); colors.pop();
     }
     console.log('drawPieces() vertices.length: ' + vertices.length);
     var sqWidth, color, v1, v2, v3, v4, ch, i;
@@ -465,14 +490,14 @@ function makeMove() {
                 bumpToMiddle(!currentPlayer); checkerMoved = true;
                 //Reset this array since we removed the only piece
 
-                slots[newSlot] = []; 
+                slots[newSlot] = [];
             }
-            else{ alert("You aren't allowed to move to this location!  Too many enemy forces!!");  return; }
+            else { alert("You aren't allowed to move to this location!  Too many enemy forces!!"); return; }
         }
     }
     var getNewSlot = slots[newSlot];
     getNewSlot.push(currentPlayer);
-    slots[newSlot]=getNewSlot;
+    slots[newSlot] = getNewSlot;
 
     var oldSlotArr = slots[slotToMoveFrom];
     oldSlotArr = oldSlotArr.splice(0, oldSlotArr.length - 1);
