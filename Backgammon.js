@@ -48,7 +48,7 @@ var currentPlayer = true;
 
 var bar1SlotNum = 6;
 var bar2SlotNum = 18;
-var numCheckersOnBoard = 30;
+var numCheckersOnBoard = 28;
 
 
 window.onload = function init() {
@@ -58,9 +58,9 @@ window.onload = function init() {
     if (!gl) { alert("WebGL isn't available"); }
 
     drawSquare();
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
     drawTriangles();
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     for (var i = 0; i < numCheckersOnBoard; i++) {
         vertices.push(vec4(1, 1, 1, 1)); vertices.push(vec4(1, 1, 1, 1));
@@ -70,10 +70,10 @@ window.onload = function init() {
         // index += 6;
     }
 
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     drawPieces();
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     // Load indices to represent the triangles that will draw each face
     indices = [];
@@ -86,17 +86,17 @@ window.onload = function init() {
         5, 4, 0, 0, 1, 5,   // left face
     ];
 
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
     //Add the indices for drawing the triangles on top of the board.
     for (var i = 8; i < index; i++) {
         indices.push(i);
     }
 
-    console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
+    // console.log("Indices.length: " + indices.length, "Vertices.length: " + vertices.length, "Index: " + index, "Colors.length: " + colors.length);
 
     theta[0] = 90.0;
     theta[1] = 0.0;
-    theta[2] = 0.0;
+    theta[2] = 180.0;
 
     //  Configure WebGL
     gl.viewport(0, 0, canvas.width, canvas.height);
@@ -235,7 +235,8 @@ function drawTriangles() {
         if (i % 2 == 0) {
             colors.push(vec4(.75, 0, .75, 1.0));
         } else { colors.push(vec4(.35, 0, .35, 1.0)); }
-    } //draw triangles (bottom row from left to right)
+    } 
+    //draw triangles (bottom row from left to right)
     for (var i = 0; i < 13; i++) {
         x1 = i * (cubeSize * (1 / 13));
         x2 = (i + 1) * (cubeSize * (1 / 13));
@@ -332,12 +333,6 @@ function initSlots() {
         [],
         [false, false] // slot 24
     ];
-
-    firstTimeThrough = false;
-    //To initialize we need to push dummy vertices so that in drawPieces() we can remove them
-    //as if the board is already drawn.
-    // console.log('end of initSlots().  slots = ' + slots);
-
 }
 
 
@@ -348,7 +343,7 @@ function drawPieces() {
         vertices.pop(); vertices.pop();
         colors.pop(); colors.pop();
     }
-    console.log('drawPieces() vertices.length: ' + vertices.length);
+    // console.log('drawPieces() vertices.length: ' + vertices.length);
     var sqWidth, color, v1, v2, v3, v4, ch, i;
     for (i = 0; i < 13; i++) {
         x1 = i * (cubeSize * (1 / 13));
@@ -424,7 +419,6 @@ function drawPieces() {
                 }
             }
         }
-
     }
 }
 
@@ -433,6 +427,7 @@ function rollDice() {
     if (die1 != 0 || die2 != 0) {
         alert("You've already rolled the dice!  Either move a piece " +
             "or skip your turn!");
+        return;
     }
     die1 = Math.ceil(Math.random() * 6);
     die2 = Math.ceil(Math.random() * 6);
@@ -458,13 +453,14 @@ function switchPlayers() {
         document.getElementById("playerTurn").innerHTML = "Player 2 " +
             "(Black Checkers) Turn!!";
     }
-
+    die1=0; die2=0; displayDiceRolls();
 }
 
 function makeMove() {
     slotToMoveFrom = Math.floor(document.getElementById("slotToMoveFrom").value);
     if (slotToMoveFrom < 0 || slotToMoveFrom > 27) {
         alert("That slot index does not exist!");
+        return;
     }
     var checkers = slots[slotToMoveFrom];
     if (checkers.length == 0 || currentPlayer != checkers[0]) {
@@ -474,15 +470,19 @@ function makeMove() {
     var spacesToMove;
     if (die1 == 0 && die2 == 0) { alert("You need to roll the dice first!"); return; }
     //next two if's check if only one die is left to move
-    if (die1 != 0 && die2 == 0) { spacesToMove = die1; die1 = 0; }
-    else if (die2 != 0 && die1 == 0) { spacesToMove = die2; die2 = 0; }
-    else if (moveDie1Amount) { spacesToMove = die1; die1 = 0; }
-    else if (!moveDie1Amount) { spacesToMove = die2; die2 = 0; }
+    if (!moveDie1Amount && die2 == 0) {alert("You've already moved based on the die2 roll!"); return; }
+    else if (moveDie1Amount && die1 == 0) {alert("You've already moved based on the die1 roll!"); return;}
+    else if (moveDie1Amount) { spacesToMove = die1; }
+    else if (!moveDie1Amount) { spacesToMove = die2; }
     else { alert("Something went wrong!!"); return; }
     //We need to skip over the two slots for the bar in the middle, so this function does that
     var newSlot = calculateNewSlot(slotToMoveFrom, spacesToMove);
     //Now we actually have to move the checker to the new slot
-    if (slots[newSlot].length != 0) {
+    if(newSlot>28 || newSlot < -1){alert("You must move the checker exactly one past the last triangle to clear it off the board");
+        return; }
+    else if((newSlot == 28 && currentPlayer) || (newSlot==-1 && !currentPlayer)) { numCheckersOnBoard--;}
+    else {
+        if(slots[newSlot].length != 0) {
         if (slots[newSlot][0] != currentPlayer) {
             //We know that there is at least one of the opponent's checkers in this slot.  If it is only one
             //checker, we bump this checker into the middle bar of the board.
@@ -494,16 +494,20 @@ function makeMove() {
             }
             else { alert("You aren't allowed to move to this location!  Too many enemy forces!!"); return; }
         }
-    }
+        }
     var getNewSlot = slots[newSlot];
     getNewSlot.push(currentPlayer);
     slots[newSlot] = getNewSlot;
-
+    }
     var oldSlotArr = slots[slotToMoveFrom];
     oldSlotArr = oldSlotArr.splice(0, oldSlotArr.length - 1);
     slots[slotToMoveFrom] = oldSlotArr;
+    if(moveDie1Amount){ die1=0; }
+    else{ die2=0; }
     window.onload();
-    console.log('end of makeMove().  slots: ' + slots + ' vertices.length: ' + vertices.length);
+    console.log('slotToMoveFrom: ' + slotToMoveFrom + ' spacesToMove: ' + spacesToMove + ' newSlot: ' + newSlot + 
+        ' getNewSlot: ' + getNewSlot + ' oldSlotArr: ' + oldSlotArr + ' slots[newSlot]: ' + slots[newSlot]);
+    // console.log('end of makeMove.  slots: ' + slots + ' vertices.length: ' + vertices.length);
 }
 
 function bumpToMiddle(enemyPlayer) {
@@ -521,6 +525,7 @@ function displayMovedByDieX() {
 //We need to make sure we skip over the two slots that hold the vertical bar through the middle of the 
 //board when we are moving the checker pieces.
 function calculateNewSlot(slotToMoveFrom, spacesToMove) {
+    if(!currentPlayer) spacesToMove=spacesToMove*-1;
     //this means we cross over the first bar index in slots
     if (slotToMoveFrom < bar1SlotNum && (slotToMoveFrom + spacesToMove) >= bar1SlotNum) {
         return slotToMoveFrom + spacesToMove + 1;
@@ -531,13 +536,15 @@ function calculateNewSlot(slotToMoveFrom, spacesToMove) {
 }
 
 function buttonAffects() {
+    if(!firstTimeThrough) return;
     var sT = document.getElementById("skipTurn");
     sT.addEventListener("click", function () {
         die1 = 0; die2 = 0; displayDiceRolls();
         switchPlayers();
     });
     var mM = document.getElementById("makeMove");
-    mM.addEventListener("click", function () { makeMove(); switchPlayers(); });
+    mM.addEventListener("click", function () { makeMove(); 
+        if(die1==0 && die2==0){switchPlayers(); } });
     var mD1 = document.getElementById("die1");
     mD1.addEventListener("click", function () {
         moveDie1Amount = true;
@@ -566,4 +573,5 @@ function buttonAffects() {
     d.addEventListener("click", function () { theta = [90, 0.0, 0.0]; axis = xAxis; });
     var e = document.getElementById("StartStop");
     e.addEventListener("click", function () { rotate = !rotate; });
+    firstTimeThrough = false;
 }
